@@ -1,6 +1,6 @@
 <?php
 
-$dsn = 'mysql:dbname=admin_clockmap;host=krlv.ml;charset=utf8"';
+$dsn = 'mysql:dbname=admin_clockmap;host=krlv.ml;charset=utf8mb4';
 $user = 'admin_clockuser';
 $password = 'u2avOfgcGf';
 

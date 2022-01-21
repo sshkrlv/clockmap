@@ -34,9 +34,11 @@ if(isset($_GET['lat'])){
             ORDER BY dist
             LIMIT 3";
     //var_dump($sql);
-    foreach ($dbh->query($sql) as $row) {
-        echo $row['Location'] . "\t";
-        echo $row['geodata'] . "\t";
-        echo $row['dist'] . "<br>";
+    if (isset($dbh)) {
+        foreach ($dbh->query($sql) as $row) {
+            echo $row['Location'] . "\t";
+            echo $row['geodata'] . "\t";
+            echo $row['dist'] . "<br>";
+        }
     }
 }
