@@ -5,8 +5,16 @@ function sendlocation({ coords }){
 
     fetch('getclocks.php?lat='+position[0]+"&long="+position[1])
         .then(response => response.json())
-        .then(clocks => alert(clocks[0].location + "  " + clocks[0].dist));
+        .then(clocks => clockstopage(clocks));
 
+}
+
+function clockstopage(clocks) {
+    let html = [];
+    clocks.forEach(function (item, i, arr) {
+
+    })
+    
 }
 
 function sendlocatioOn({ coords }){
