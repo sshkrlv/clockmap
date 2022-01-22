@@ -13,17 +13,10 @@ class ClockController{
             ORDER BY dist
             LIMIT 3";
             $clocks = array();
-
             foreach ($dbh->query($sql) as $row) {
-                $clock = new Clock();
-                $clock->coord = $row['Coord'];
-                $clock->seDist($row['dist']);
-                $clock->location = $row['Location'];
-                $clock->type = $row['type'];
-
-                $clocks[] = $clock;
+                $clocks[] = Clock::fromPDORow($row);
             }
-            echo(json_encode($clocks));
+            //echo(json_encode($clocks));
 
             return($clocks);
         }
@@ -31,11 +24,12 @@ class ClockController{
     }
 
     static function actionIndex(){
-        if(isset($_GET['lat'])){
+        if(isset($_GET['lat']) && isset($_GET['long'])){
             $clocks = ClockController::getClosest($_GET['lat'], $_GET['long']);
+            ClockView::render($clocks);
+        }else{
+            ClockView::render(null);
         }
-        $clocks = "";
-        ClockView::render($clocks);
     }
 }
 
@@ -45,7 +39,7 @@ class ClockController{
     }
 
 class ListItem{
-        static function show($heading, $placeholder, $hint){
+        static function render($heading, $placeholder, $hint){
             echo '
             <a href="#" class="list-group-item list-group-item-action d-flex gap-3 py-3" aria-current="true">
                 <img src="https://github.com/twbs.png" alt="twbs" width="32" height="32" class="rounded-circle flex-shrink-0">
@@ -65,53 +59,33 @@ class ListItem{
     {
         static function render($model)
         {
-            echo '<!doctype html>
-<html lang="ru">
-  <head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+            include "static/html/header.html";
+            include "views/ClocksIndex.php";
 
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-    <script type="text/javascript" src="static/js/main.js"></script>
-    <style>
-        .list-group {
-            width: auto;
-            max-width: 460px;
-            margin: 4rem auto;
-        }
-    </style>
-    <title>Часы</title>
-  </head>
-  <body>
-     <!-- Optional JavaScript; choose one of the two! -->
-
-    <!-- Option 1: Bootstrap Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>;
-            
-            <button onclick="navigator.geolocation.getCurrentPosition(sendlocation)">ближайшие</button>';
-            echo '<div class="list-group">';
-
-            foreach ($model as $item) {
-                ListItem::show($item->location, $item->type, $item->friendlyDist);
-            }
-
-            echo '</div>  </body> </html>';
+            echo ' </body> </html>';
 
         }
     }
 
 
 class Clock{
-    public $coord;
-    public $location;
-    public $dist;
+    public $coords;
+    public string $address;
+    public float $dist;
     public $type;
     public $friendlyDist;
-    public function seDist(float $dist): void
+    public function setDist(float $dist): void
     {
         $this->dist = $dist;
         $this->friendlyDist = ($dist > 1000) ? round($dist/1000, 2)." км" : round($dist, 2)." м";
+    }
+    public function __construct($address, $coords, $dist, $type){
+        $this->address = $address;
+        $this->coords = $coords;
+        $this->type = $type;
+        $this->setDist($dist);
+    }
+    public static function fromPDORow($row) : static {
+        return new static($row['Location'], $row['Coord'], $row['dist'], $row['type']);
     }
 }

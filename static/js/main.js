@@ -23,3 +23,13 @@ function sendlocatioOn({ coords }){
     console.log(position);
     location.href = '?lat=' + position[0] + '&' + 'long=' + position[1];
 }
+
+
+function process({coords}) {
+    const { latitude, longitude } = coords;
+    const position = [latitude, longitude];
+    console.log(position);
+    document.getElementById("lat").value = position[0];
+    document.getElementById("long").value = position[1];
+    document.getElementById("lat").closest("form").submit();
+}
