@@ -1,9 +1,11 @@
 <?php
 namespace Main;
-
+//ini_set('error_reporting', E_ALL);
+//ini_set('display_errors', 1);
+//ini_set('display_startup_errors', 1);
 class ClockController{
 
-    static function getClosest($lat, $long){
+    static function getClosest($lat, $long, $count){
         require("db.php");
         if (isset($dbh)) {
             $sql = "SELECT Location, ST_AsText(geodata) as Coord, clock_types.Name as type,
@@ -11,7 +13,7 @@ class ClockController{
             FROM clock_registry
             INNER JOIN clock_types ON clock_registry.`type_ID` = clock_types.ID
             ORDER BY dist
-            LIMIT 3";
+            LIMIT ".$count;
             $clocks = array();
             foreach ($dbh->query($sql) as $row) {
                 $clocks[] = Clock::fromPDORow($row);
@@ -25,10 +27,10 @@ class ClockController{
 
     static function actionIndex(){
         if(isset($_GET['lat']) && isset($_GET['long'])){
-            $clocks = ClockController::getClosest($_GET['lat'], $_GET['long']);
+            $clocks = ClockController::getClosest($_GET['lat'], $_GET['long'], (!isset($_GET['count'])) ? 3 : $_GET['count']);
             ClockView::render($clocks);
         }else{
-            ClockView::render(null);
+            ClockView::render([]);
         }
     }
 }
