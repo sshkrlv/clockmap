@@ -1,4 +1,5 @@
 <?php
+use Main\Clock;
 /* @var $model Clock */
 ?>
 <div class="container">
@@ -17,18 +18,19 @@
 
 <div class="list-group">
 
-    <?php
-    use Main\Clock;
-    use Main\ListItem;
-    if(isset($model)) {
-            ListItem::render($model->address, $model->type, $model->friendlyDist);
-    }
-    ?>
-    <div id="map" class="" style="width: auto; max-width: 460px; height: 360px; img max-width: none;" ></div>
-
+    <div class="card" style="width: auto;">
+        <h5 class="card-header text-center"><?= $model->type?></h5>
+        <div id="map" class="card-img-top" style="width: auto; max-width: 460px; height: 360px; img max-width: none;" ></div>
+        <div class="card-body">
+            <p class="card-text"> <?= $model->address?></p>
+            <?php if( $model->friendlyDist != null) : ?>
+                <p class="card-text"><small class="text-muted"><?= $model->friendlyDist ?></small></p>
+            <?php endif; ?>
+        </div>
+    </div>
 </div>
 
-<div id="map" class="" style="width: auto; max-width: 460px; height: 360px; img max-width: none;" ></div>
+
 <script type="text/javascript">
     // Функция ymaps.ready() будет вызвана, когда
     // загрузятся все компоненты API, а также когда будет готово DOM-дерево.
