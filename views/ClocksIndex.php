@@ -19,7 +19,7 @@
     <div class="d-flex justify-content-end">
         <ul class="nav">
             <li class="nav-item" onclick="countDisplayClocs(3)">
-                <button type="button" class="btn <?php if(count($model) == 3){ echo "btn-secondary";} else{ echo "btn-outline-secondary";}?>">3</button>
+                <button type="button" class="btn <?php if(count($model) == 3) echo "btn-secondary"; else echo "btn-outline-secondary";?>">3</button>
             </li>
             <li class="nav-item" onclick="countDisplayClocs(10)">
                 <button  type="button" class="btn <?php if(count($model) == 10) echo "btn-secondary"; else echo "btn-outline-secondary";?>">10</button>
@@ -34,8 +34,26 @@
     use Main\ListItem;
     if(isset($model)) {
         foreach ($model as $item) {
-            ListItem::render($item->address, $item->type, $item->friendlyDist);
+            ListItem::render($item->address, $item->type, $item->friendlyDist, "?action=details&id=".$item->id);
         }
     }
     ?>
 </div>
+
+<nav>
+    <ul class="pagination justify-content-center">
+        <li class="page-item disabled">
+            <a class="page-link" href="#" tabindex="-1">Previous</a>
+        </li>
+
+        <li class="page-item"><a class="page-link" href="<?php if(!isset($_GET['page']) || $_GET['page'] == 1) echo $_SERVER['REQUEST_URI'].'&page=1">1';
+                                                                else echo explode("&page=", $_SERVER['REQUEST_URI'])[0].'&page='.($_GET['page']-1).'">'.($_GET['page']-1);?></a></li>
+        <li class="page-item"><a class="page-link" href="<?php if(!isset($_GET['page']) || $_GET['page'] == 1) echo $_SERVER['REQUEST_URI'].'&page=2">2';
+            else echo explode("&page=", $_SERVER['REQUEST_URI'])[0].'&page='.($_GET['page']).'">'.($_GET['page']);?></a></li>
+        <li class="page-item"><a class="page-link" href="<?php if(!isset($_GET['page']) || $_GET['page'] == 1) echo $_SERVER['REQUEST_URI'].'&page=3">3';
+            else echo explode("&page=", $_SERVER['REQUEST_URI'])[0].'&page='.($_GET['page']+1).'">'.($_GET['page']+1);?></a></li>
+        <li class="page-item">
+            <a class="page-link" href="#">Next</a>
+        </li>
+    </ul>
+</nav>

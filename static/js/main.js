@@ -40,3 +40,4 @@ function countDisplayClocs(count) {
         location.href += "&count=" + count;
     }
 }
+
