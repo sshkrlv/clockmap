@@ -8,7 +8,7 @@ class ClockController{
     static function getOne($id, $userLat = null, $userLong = null){
         require("db.php");
         if (isset($dbh)) {
-            $sql = "SELECT clock_registry.global_id as clock_id, Location, ST_AsText(geodata) as Coord, clock_types.Name as type";
+            $sql = "SELECT clock_registry.global_id as clock_id, X(geodata) as X, Y(geodata) as Y, Location, ST_AsText(geodata) as Coord, clock_types.Name as type";
 
             if(isset($userLat) && isset($userLong)){
                 $sql .= ",ST_Distance_Sphere(ST_GeomFromText('POINT(".$userLat." ".$userLong.")'), geodata) AS dist";
@@ -32,7 +32,7 @@ class ClockController{
             $totalResults = $dbh->query("SELECT count(*) FROM clock_registry")->fetchColumn();
             $totalPages = $totalResults/$count;
 
-            $sql = "SELECT clock_registry.global_id as clock_id, Location, ST_AsText(geodata) as Coord, clock_types.Name as type,
+            $sql = "SELECT clock_registry.global_id as clock_id, X(geodata) as X, Y(geodata) as Y, Location, ST_AsText(geodata) as Coord, clock_types.Name as type,
             ST_Distance_Sphere(ST_GeomFromText('POINT(".$lat." ".$long.")'), geodata) AS dist
             FROM clock_registry
             INNER JOIN clock_types ON clock_registry.`type_ID` = clock_types.ID
@@ -132,22 +132,28 @@ class Clock{
     public $dist ;
     public $type;
     public $friendlyDist;
+
+    public $coordX;
+    public $coordY;
+
     public function setDist(float $dist)
     {
         $this->dist = $dist;
         $this->friendlyDist = ($dist > 1000) ? round($dist/1000, 2)." км" : round($dist, 2)." м";
     }
-    public function __construct($id, $address, $coords, $dist, $type)
+    public function __construct($id, $address, $coords, $X, $Y, $dist, $type)
     {
         $this->id = $id;
         $this->address = $address;
         $this->coords = $coords;
+        $this->coordX = $X;
+        $this->coordY = $Y;
         $this->type = $type;
 
         ($dist != null) ? $this->setDist($dist) : false;
     }
     public static function fromPDORow($row): static
     {
-        return new static($row['clock_id'],$row['Location'], $row['Coord'], $row['dist']?? null, $row['type']);
+        return new static($row['clock_id'],$row['Location'], $row['Coord'], $row['X'], $row['Y'],$row['dist']?? null, $row['type']);
     }
 }
