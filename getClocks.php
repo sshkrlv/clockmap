@@ -44,17 +44,17 @@ class ClockController{
             }
             //echo(json_encode($clocks));
 
-            return($clocks);
+            return(['clocks'=> $clocks, 'totalPages' => $totalPages, 'page' => $page]);
         }
         return null;
     }
 
     static function actionIndex(){
         if(isset($_GET['lat']) && isset($_GET['long'])){
-            $clocks = ClockController::getClosest($_GET['lat'], $_GET['long'], (!isset($_GET['count'])) ? 3 : $_GET['count'], (!isset($_GET['page'])) ? 1 : $_GET['page']);
-            ClockView::render($clocks, "index");
+            $model = ClockController::getClosest($_GET['lat'], $_GET['long'], (!isset($_GET['count'])) ? 3 : $_GET['count'], (!isset($_GET['page'])) ? 1 : $_GET['page']);
+            ClockView::render($model, "index");
         }else{
-            ClockView::render([], "index");
+            ClockView::render(['clocks'=> []], "index");
         }
     }
 
@@ -108,7 +108,7 @@ class ListItem{
 /* @var $model Clock[] */
     class ClockView
     {
-        static function render($model, $action)
+        static function render($model, $action, $data = null)
         {
             include "static/html/header.html";
             switch ($action){
