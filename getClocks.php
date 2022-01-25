@@ -3,6 +3,10 @@ namespace Main;
 ini_set('error_reporting', E_ALL);
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
+
+require_once('models/Clock.php');
+require_once('views/Clock/main.php');
+
 class ClockController{
 
     static function getAll($userLat = null, $userLong = null){
@@ -123,75 +127,5 @@ class ClockController{
         }else{
             ClockController::actionIndex();
         }
+   }
 
-        //ClockController::getClosest($_GET['lat'], $_GET['long']);
-    }
-
-class ListItem{
-        static function render($heading, $placeholder, $hint, $link = "#"){
-            echo '
-            <a href="'.$link.'" class="list-group-item list-group-item-action d-flex gap-3 py-3" aria-current="true">
-                <img src="https://github.com/twbs.png" alt="twbs" width="32" height="32" class="rounded-circle flex-shrink-0">
-                <div class="d-flex gap-2 w-100 justify-content-between">
-                    <div>
-                        <h6 class="mb-0">'.$heading.'</h6>
-                        <p class="mb-0 opacity-75">'.$placeholder.'</p>
-                    </div>
-                    <small class="opacity-50 text-nowrap">'.$hint.'</small>
-                </div>
-            </a>';
-        }
-}
-
-/* @var $model Clock[] */
-    class ClockView
-    {
-        static function render($model, $action, $data = null)
-        {
-            include "static/html/header.html";
-            switch ($action){
-                case "index":
-                    include "views/ClocksIndex.php";
-                    break;
-                case "details":
-                    include "views/ClocksDetails.php";
-                    break;
-            }
-            echo ' </body> </html>';
-
-        }
-    }
-
-
-class Clock{
-    public int $id;
-    public $coords;
-    public string $address;
-    public float $dist ;
-    public $type;
-    public $friendlyDist;
-
-    public float $coordX;
-    public float $coordY;
-
-    public function setDist(float $dist)
-    {
-        $this->dist = $dist;
-        $this->friendlyDist = ($dist > 1000) ? round($dist/1000, 2)." км" : round($dist, 2)." м";
-    }
-    public function __construct($id, $address, $coords, $X, $Y, $dist, $type)
-    {
-        $this->id = $id;
-        $this->address = $address;
-        $this->coords = $coords;
-        $this->coordX = $X;
-        $this->coordY = $Y;
-        $this->type = $type;
-
-        ($dist != null) ? $this->setDist($dist) : false;
-    }
-    public static function fromPDORow($row): static
-    {
-        return new static($row['clock_id'],$row['Location'], $row['Coord'], $row['X'], $row['Y'],$row['dist']?? null, $row['type']);
-    }
-}
