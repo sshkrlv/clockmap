@@ -93,20 +93,32 @@
     ymaps.ready(init);
     function init(){
         var myMap = new ymaps.Map("map", {
-            // Координаты центра карты.
-            // Порядок по умолчанию: «широта, долгота».
-            // Чтобы не определять координаты центра карты вручную,
-            // воспользуйтесь инструментом Определение координат.
-            center: [<?= (isset($_GET['lat'])) ? $_GET['lat'] : 55.8 ?>, <?= (isset($_GET['lat'])) ? $_GET['long'] : 37.8 ?>],
-            // Уровень масштабирования. Допустимые значения:
-            // от 0 (весь мир) до 19.
-            zoom: 12,
-            controls: ['geolocationControl']
-        });
+                // Координаты центра карты.
+                // Порядок по умолчанию: «широта, долгота».
+                // Чтобы не определять координаты центра карты вручную,
+                // воспользуйтесь инструментом Определение координат.
+                center: [<?= (isset($_GET['lat'])) ? $_GET['lat'] : 55.8 ?>, <?= (isset($_GET['lat'])) ? $_GET['long'] : 37.8 ?>],
+                // Уровень масштабирования. Допустимые значения:
+                // от 0 (весь мир) до 19.
+                zoom: 12,
+                controls: ['geolocationControl']
+            }),
+            objectManager = new ymaps.ObjectManager({
+                // Чтобы метки начали кластеризоваться, выставляем опцию.
+                clusterize: true,
+                // ObjectManager принимает те же опции, что и кластеризатор.
+                gridSize: 32,
+                clusterDisableClickZoom: false,
+            });
+
+        myMap.geoObjects.add(objectManager);
         var mapModalEl = document.getElementById('mapModal')
         mapModalEl.addEventListener('shown.bs.modal', function (event) {
+            fetch('index.php?action=geoJson')
+                .then(response => response.json())
+                .then(data => objectManager.add(data));
             myMap.container.fitToViewport();
-            console.log(myMap);
-        })
+           // console.log(myMap);
+        });
     }
 </script>

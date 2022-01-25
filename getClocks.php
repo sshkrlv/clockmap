@@ -5,6 +5,29 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 class ClockController{
 
+    static function getAll($userLat = null, $userLong = null){
+        require("db.php");
+        if (isset($dbh)) {
+            $sql = "SELECT clock_registry.global_id as clock_id, X(geodata) as X, Y(geodata) as Y, Location, ST_AsText(geodata) as Coord, clock_types.Name as type";
+            if(isset($userLat) && isset($userLong)){
+                $sql .= ",ST_Distance_Sphere(ST_GeomFromText('POINT(".$userLat." ".$userLong.")'), geodata) AS dist";
+            }
+            $sql .=" FROM clock_registry
+            INNER JOIN clock_types ON clock_registry.`type_ID` = clock_types.ID";
+
+            /* @var $dbh \PDO */
+            $result = $dbh->query($sql)->fetchAll();
+            $clocks = [];
+            if(!$result)
+                return null;
+            else {
+                foreach ($result as $row)
+                    $clocks[] = Clock::fromPDORow($row);
+                return $clocks;
+            }
+        }
+    }
+
     static function getOne($id, $userLat = null, $userLong = null){
         require("db.php");
         if (isset($dbh)) {
@@ -23,6 +46,7 @@ class ClockController{
             else
                 return Clock::fromPDORow($result);
         }
+        return null;
     }
 
     static function getClosest($lat, $long, $count, $page = 1){
@@ -71,7 +95,18 @@ class ClockController{
             else
                 ClockView::render($clock, "details");
         }
+    }
 
+    static function geoJson(){
+        /* @var $clocks Clock[] */
+        $clocks = ClockController::getAll();
+        $features = [];
+        foreach ($clocks as $clock){
+            $features[] = (object)['type' => 'feature', 'id' => $clock->id, 'geometry' => (object)['type' => 'Point',
+                'coordinates' => [$clock->coordX, $clock->coordY]], 'properties' => (object)['balloonContent' => htmlspecialchars($clock->address) ]];
+        }
+        header('Content-Type: application/json');
+        echo json_encode((object)["type" => "FeatureCollection", 'features' => $features],  JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
     }
 }
 
@@ -80,6 +115,9 @@ class ClockController{
             switch ($_GET['action']){
                 case "details":
                     ClockController::actionDetails();
+                    break;
+                case 'geoJson':
+                    ClockController::geoJson();
                     break;
             }
         }else{
@@ -126,15 +164,15 @@ class ListItem{
 
 
 class Clock{
-    public $id;
+    public int $id;
     public $coords;
     public string $address;
-    public $dist ;
+    public float $dist ;
     public $type;
     public $friendlyDist;
 
-    public $coordX;
-    public $coordY;
+    public float $coordX;
+    public float $coordY;
 
     public function setDist(float $dist)
     {
